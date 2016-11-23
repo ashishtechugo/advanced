@@ -1,18 +1,17 @@
 <?php
-namespace api\modules\driver\controllers;
+namespace api\modules\user\controllers;
 
 use Yii;
-use common\models\Driver;
-use api\modules\driver\models\SignupForm;
-use api\modules\driver\models\LoginForm;
+use common\models\User;
+use api\modules\user\models\SignupForm;
+use api\modules\user\models\LoginForm;
 use yii\rest\ActiveController;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use yii\filters\auth\CompositeAuth;
 use yii\filters\auth\QueryParamAuth;
-class DriverController extends ActiveController
-{
-    public $modelClass = '\common\models\Driver';
+class UserController extends ActiveController{
+    public $modelClass = '\common\models\User';
     public $serializer = [
         'class' => 'yii\rest\Serializer',
         'collectionEnvelope' => 'items',
@@ -47,12 +46,12 @@ class DriverController extends ActiveController
         //     'query' => $query,
         // ]);
     }
-    
+
     /**
-     *Signup driver
-     */
-    public function actionCreate()
-    {
+    *Signup User
+    */
+    public function actionCreate(){
+        //echo "here";die;
         $model = new SignupForm;
         $model->load(Yii::$app->getRequest()->getBodyParams(), '');
         if($model->validate()){
@@ -70,34 +69,30 @@ class DriverController extends ActiveController
     }
 
     /**
-    *Login driver
+    *Login User
     */
     public function actionLogin(){
-
         $model = new LoginForm();
-        
-        $model->load(Yii::$app->getRequest()->getBodyParams(), '');
+        $model->load(Yii::$app->getRequest()->getBodyParams(),'');
 
         if($model->validate()){
-           $driver = $model->login();
-           //print_r($driver);die;
-           if (!$driver) {
-             return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
-           } elseif($driver->otp_status == 'NO') {
-             $data = array('id'=>$driver->id,'otp'=>'1234');
-             return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
-           }else {
-             return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
-           }
-        }else {
-           return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
+            $user =  $model->login();
+            if(!$user){
+                return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
+            }elseif($user->otp_status == "NO"){
+                $data = array('id'=>$user->id,'otp'=>'1234');
+                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+            }else{
+                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$user];
+            }
+        }else{
+            return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
         }
         return $model;
-        
     }
 
     /**
-    *verify and update otp driver
+    * verify and update otp user
     */
     public function actionVerifyotp() {
         
@@ -109,10 +104,10 @@ class DriverController extends ActiveController
             return ['error_code'=>400,'result' =>'failure','message'=>"OTP field required."];
         }
 
-        $result = Yii::$app->commonfunction->checkotp($_POST['id'], $_POST['otp'],'driver');
-        $driver = Driver::findIdentity($_POST['id']);
+        $result = Yii::$app->commonfunction->checkotp($_POST['id'], $_POST['otp'],'user');
+        $user = User::findIdentity($_POST['id']);
         if($result === true){
-            return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
+            return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$user];
         }else{
             return ['error_code'=>400,'result' =>'failure','message'=>"Wrong OTP"];
         }

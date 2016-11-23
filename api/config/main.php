@@ -15,6 +15,10 @@ return [
         'driver' => [
             'basePath' => '@app/modules/driver/',
             'class' => 'api\modules\driver\Module'
+        ],
+        'user' => [
+            'basePath' => '@app/modules/user/',
+            'class' => 'api\modules\user\Module'
         ]
     ],
     'components' => [        
@@ -50,13 +54,14 @@ return [
                 [
                     'class' => 'yii\rest\UrlRule', 
                     'controller' => [
-                        'driver/driver'
+                        'driver/driver','user/user'
                     ],
                     'tokens' => [
                         '{id}' => '<id:\\w+>'
                     ],
 			        'extraPatterns' => [
-                        //'GET validateemail' => 'validateemail',
+                        'POST verifyotp' => 'verifyotp',
+                        'POST login' => 'login',
                         // 'POST requestpasswordreset' => 'requestpasswordreset',
                         // 'POST acceptbooking'   =>'acceptbooking',
                         // 'POST rejectbooking'   =>'rejectbooking',

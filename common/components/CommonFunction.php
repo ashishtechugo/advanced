@@ -205,5 +205,50 @@ class CommonFunction extends Component
        $response = $curl->get($url); 
        return $response;
     }
+
+
+    /**
+     * Function : Check For AuthKey
+     */
+     public function checkAuthkey($token){
+         
+         $userDetailArray = Yii::$app->db->createCommand('SELECT * FROM driver WHERE auth_key=:auth_key')
+           ->bindValue(':auth_key', $token)
+           ->queryOne();
+
+         if(!empty($userDetailArray)){
+             $updateStatus = Yii::$app->db->createCommand('UPDATE `driver` SET `email_verification_status` = "YES" WHERE auth_key=:auth_key')
+             ->bindValue(':auth_key', $token)
+             ->execute();
+             
+             if($updateStatus == 1){
+                 return true;
+             }
+         }else{
+             return false;
+         }
+     }
+
+     /**
+     * Function : Check For otp
+     */
+     public function checkotp($id,$otp,$tablename){
+         
+         $userDetailArray = Yii::$app->db->createCommand('SELECT * FROM '.$tablename.' WHERE id=:id AND otp=:otp')
+           ->bindValue(':id', $id)
+           ->bindValue(':otp', $otp)
+           ->queryOne();
+
+         if(!empty($userDetailArray)){
+             $updateStatus = Yii::$app->db->createCommand('UPDATE `'.$tablename.'` SET `otp_status` = "YES" WHERE id=:id')
+             ->bindValue(':id', $id)
+             ->execute();
+             if($updateStatus == 1){
+                 return true;
+             }
+         }else{
+             return false;
+         }
+     }
 	
 }

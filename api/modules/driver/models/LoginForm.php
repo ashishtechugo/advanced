@@ -25,8 +25,11 @@ class LoginForm extends Model
         return [
             // username and password are both required
             [['email', 'password'], 'required'],
+            ['email', 'emailNotExist'],
+
             // rememberMe must be a boolean value
             //['rememberMe', 'boolean'],
+
             // password is validated by validatePassword()
             ['password', 'validatePassword'],
         ];
@@ -46,6 +49,21 @@ class LoginForm extends Model
             //print_r($driver);die;
             if (!$driver || !$driver->validatePassword($this->password)) {
                 $this->addError($attribute, 'Incorrect username or password.');
+            }
+        }
+    }
+
+    /**
+    * Validate Email/phone For Not Exist.
+    * This method serves as the inline validation for email.
+    */
+    public function emailNotExist($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            $driver = $this->getDriver();
+            //print_r($user);die;
+            if (empty($driver)) {
+                $this->addError($attribute, 'Email/Phone not exists.');
             }
         }
     }
@@ -72,7 +90,7 @@ class LoginForm extends Model
     protected function getDriver()
     {
         if ($this->_driver === null) {
-            $this->_driver = Driver::findByEmail($this->email);
+            $this->_driver = Driver::findByEmailPhone($this->email);
         }
 
         return $this->_driver;

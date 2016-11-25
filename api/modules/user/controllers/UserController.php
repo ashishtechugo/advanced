@@ -59,7 +59,7 @@ class UserController extends ActiveController{
            if (!$user) {
              return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
            } else {
-             $data = array('id'=>$user->id,'otp'=>'1234');
+             $data = array('id'=>$user->id);
              return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
            }
         }else {
@@ -80,8 +80,8 @@ class UserController extends ActiveController{
             if(!$user){
                 return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
             }elseif($user->otp_status == "NO"){
-                $data = array('id'=>$user->id,'otp'=>'1234');
-                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+                $data = array('id'=>$user->id);
+                return ['error_code'=>201,'result' =>'success','message'=>'','data'=>$data];
             }else{
                 return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$user];
             }
@@ -92,26 +92,85 @@ class UserController extends ActiveController{
     }
 
     /**
+    *Get OTP user
+    */
+    public function actionGetOtp(){
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        //$otp = Yii::$app->commonfunction->genrateotp($_POST['id'],'user');
+        //$data = array('id'=>$_POST['id'],'otp'=>$otp);
+        $data = array('id'=>$_POST['id'],'otp'=>'1234');
+        return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+    }
+
+    /**
     * verify and update otp user
     */
     public function actionVerifyotp() {
-        
-        if(isset($_POST['id']) && empty($_POST['id'])){
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        if(isset($requestData['id']) && empty($requestData['id'])){
             return ['error_code'=>400,'result' =>'failure','message'=>"ID field required."];
         }
 
-        if(isset($_POST['otp']) && empty($_POST['otp'])){
+        if(isset($requestData['otp']) && empty($requestData['otp'])){
             return ['error_code'=>400,'result' =>'failure','message'=>"OTP field required."];
         }
 
-        $result = Yii::$app->commonfunction->checkotp($_POST['id'], $_POST['otp'],'user');
-        $user = User::findIdentity($_POST['id']);
+        $result = Yii::$app->commonfunction->checkotp($requestData['id'], $requestData['otp'],'user');
+        $user = User::findIdentity($requestData['id']);
         if($result === true){
             return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$user];
         }else{
             return ['error_code'=>400,'result' =>'failure','message'=>"Wrong OTP"];
         }
 
+    }
+
+    /**
+    *Reset Password Validation By Mobile number & Email
+    */
+    public function actionResetPasswordValidate(){
+        
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        //BY Mobile Number
+        if(isset($requestData['phone_number']) && !empty($requestData['phone_number'])){
+            
+            //echo "mobile number";die;
+            $resdata = Yii::$app->commonfunction->resetpasswordotp($requestData['phone_number'],'user');
+            if(!empty($resdata)){
+                $data = array('id'=>$resdata['id'],'otp'=>$resdata['otp']);
+                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+            }else{
+                return ['error_code'=>400,'result' =>'failure','message'=>'Mobile number not found.'];
+            }
+
+        }
+
+        //BY Email-ID
+        if(isset($requestData['email']) && !empty($requestData['email'])){
+            echo "email";die;
+        }
+
+    }
+
+    /**
+    *Reset Password 
+    *Input: old_password, new_password
+    */
+    public function actionResetPassword(){
+        
+        $model = new LoginForm();
+        $model->scenario = 'resetpass';
+        $model->load(Yii::$app->getRequest()->getBodyParams(),'');
+        if($model->validate()){
+            $user = $model->resetpassword();
+            if(!$user){
+                return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
+            }else{
+                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$user];
+            }
+        }else{
+            return ['error_code'=>400,'result'=>'failuree','message'=>array_values($model->getFirstErrors())[0]];
+        }
     }
 
 }

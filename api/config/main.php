@@ -62,6 +62,9 @@ return [
 			        'extraPatterns' => [
                         'POST verifyotp' => 'verifyotp',
                         'POST login' => 'login',
+                        'POST get-otp' => 'get-otp',
+                        'POST reset-password-validate' => 'reset-password-validate',
+                        'POST reset-password' => 'reset-password',
                         // 'POST requestpasswordreset' => 'requestpasswordreset',
                         // 'POST acceptbooking'   =>'acceptbooking',
                         // 'POST rejectbooking'   =>'rejectbooking',

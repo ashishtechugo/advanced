@@ -245,10 +245,45 @@ class CommonFunction extends Component
              ->execute();
              if($updateStatus == 1){
                  return true;
+             }else{
+                 return true;
              }
          }else{
              return false;
          }
      }
-	
+
+     /**
+     *Genrate otp and update previous otp
+     */
+     public function genrateotp($id,$tablename){
+         $otp = rand(1001,9999);
+         $updateStatus = Yii::$app->db->createCommand('UPDATE `'.$tablename.'` SET `otp` = '.$otp.' WHERE id=:id')
+             ->bindValue(':id', $id)
+             ->execute();
+        if($updateStatus == 1){
+            return $otp;
+        }
+
+     }
+
+     /**
+     *Genrate otp and update previous otp for reset password
+     */
+     public function resetpasswordotp($phone_number,$tablename){
+         $otp = rand(1001,9999);
+         $updateStatus = Yii::$app->db->createCommand('UPDATE `'.$tablename.'` SET `otp` = '.$otp.' WHERE phone_number=:phone_number')
+             ->bindValue(':phone_number', $phone_number)
+             ->execute();
+        if($updateStatus == 1){
+            $userDetailArray = Yii::$app->db->createCommand('SELECT * FROM '.$tablename.' WHERE phone_number=:phone_number AND otp=:otp')
+                ->bindValue(':phone_number', $phone_number)
+                ->bindValue(':otp', $otp)
+                ->queryOne();
+
+            return $userDetailArray;
+        }
+
+     }
+
 }

@@ -84,14 +84,17 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * Finds user by email
+     * Finds user by email/phone_number
      *
      * @param string $email
      * @return static|null
      */
-    public static function findByEmail($email)
+    public static function findByEmailPhone($email)
     {
-        return static::findOne(['email' => $email]);
+        return static::find()
+                    ->Where('email = :email',[':email' => $email])
+                    ->orWhere('phone_number = :email',[':email' => $email])
+                    ->one();
     }
 
     /**
@@ -197,4 +200,5 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
     }
+
 }

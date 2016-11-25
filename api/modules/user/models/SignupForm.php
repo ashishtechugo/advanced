@@ -31,6 +31,7 @@ class SignupForm extends Model
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
             ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This email address has already been taken.'],
+            ['email', 'unique', 'targetClass' => '\common\models\Driver', 'message' => 'This email address has already been taken.'],
 
             ['fname', 'required'],
             ['lname', 'safe'],
@@ -41,10 +42,12 @@ class SignupForm extends Model
             ['phone_number', 'required'],
             ['phone_number', 'string', 'min' => 10, 'max' => 20],
             ['phone_number', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This mobile number has already been taken.'],
+            ['phone_number', 'unique', 'targetClass' => '\common\models\Driver', 'message' => 'This mobile number has already been taken.'],
             
             ['social_id', 'trim'],
             ['social_id', 'string','min' => 5],
             ['social_id', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This social_id has already been taken.'],
+            ['social_id', 'unique', 'targetClass' => '\common\models\Driver', 'message' => 'This social_id has already been taken.'],
             
 			['otp', 'safe'],
         ];
@@ -75,11 +78,11 @@ class SignupForm extends Model
         
         if($user->save()){
 
-            $resetLink = $_SERVER['HTTP_HOST'].'/site/verify-email?token='.$this->authkey;
+            /*$resetLink = $_SERVER['HTTP_HOST'].'/site/verify-email?token='.$this->authkey;
             $varKeywordContent = array('{to_email}','{email_verification_link}');
             $varKeywordValueContent = array(ucfirst($this->email),$resetLink);
 
-            Yii::$app->commonfunction->sendMail(3,$this->email,$varKeywordContent,$varKeywordValueContent);
+            Yii::$app->commonfunction->sendMail(3,$this->email,$varKeywordContent,$varKeywordValueContent);*/
             return $user;
 
         } else {

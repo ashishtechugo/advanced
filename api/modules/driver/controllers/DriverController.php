@@ -84,8 +84,8 @@ class DriverController extends ActiveController
            if (!$driver) {
              return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
            } elseif($driver->otp_status == 'NO') {
-             $data = array('id'=>$driver->id,'otp'=>'1234');
-             return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+             $data = array('id'=>$driver->id);
+             return ['error_code'=>201,'result' =>'success','message'=>'','data'=>$data];
            }else {
              return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
            }
@@ -97,20 +97,31 @@ class DriverController extends ActiveController
     }
 
     /**
+    *Get OTP driver
+    */
+    public function actionGetOtp(){
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        //$otp = Yii::$app->commonfunction->genrateotp($requestData['id'],'driver');
+        //$data = array('id'=>$requestData['id'],'otp'=>$otp);
+        $data = array('id'=>$requestData['id'],'otp'=>'1234');
+        return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+    }
+
+    /**
     *verify and update otp driver
     */
     public function actionVerifyotp() {
-        
-        if(isset($_POST['id']) && empty($_POST['id'])){
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        if(isset($requestData['id']) && empty($requestData['id'])){
             return ['error_code'=>400,'result' =>'failure','message'=>"ID field required."];
         }
 
-        if(isset($_POST['otp']) && empty($_POST['otp'])){
+        if(isset($requestData['otp']) && empty($requestData['otp'])){
             return ['error_code'=>400,'result' =>'failure','message'=>"OTP field required."];
         }
-
-        $result = Yii::$app->commonfunction->checkotp($_POST['id'], $_POST['otp'],'driver');
-        $driver = Driver::findIdentity($_POST['id']);
+        
+        $result = Yii::$app->commonfunction->checkotp($requestData['id'], $requestData['otp'],'driver');
+        $driver = Driver::findIdentity($requestData['id']);
         if($result === true){
             return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
         }else{

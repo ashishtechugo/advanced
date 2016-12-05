@@ -78,10 +78,10 @@ class User extends ActiveRecord implements IdentityInterface
      * @param string $username
      * @return static|null
      */
-    public static function findByUsername($username)
+    /*public static function findByUsername($username)
     {
         return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
-    }
+    }*/
 
     /**
      * Finds user by email/phone_number
@@ -89,11 +89,12 @@ class User extends ActiveRecord implements IdentityInterface
      * @param string $email
      * @return static|null
      */
-    public static function findByEmailPhone($email)
+    public static function findByEmailPhoneSocial($email)
     {
         return static::find()
                     ->Where('email = :email',[':email' => $email])
-                    ->orWhere('phone_number = :email',[':email' => $email])
+                    ->orWhere('phone_number = :phone_number',[':phone_number' => $email])
+                    ->orWhere('social_id = :social_id',[':social_id' => $email])
                     ->one();
     }
 

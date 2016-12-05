@@ -1,53 +1,98 @@
 <?php
-
-/* @var $this yii\web\View */
-
-$this->title = 'Bamboo Admin';
+ 
+use marekpetras\yii2ajaxboxwidget\Box;
+use yii\helpers\Html;
+ 
 ?>
-<div class="site-index">
-
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
-
-        <p class="lead">You have successfully created your Yii-powered application.</p>
-
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
+ 
+ 
+<div class="health-default-index">
+    <?php $box = Box::begin(['title'=>'Select clients and date range']); ?>
+ 
+    <?=Html::beginForm(['report'],'post',['id'=>'healthcheckform','layout'=>'inline']); ?>
+ 
+    <div class="row">
+        <div class="col-sm-5">
+            <select>
+                <options>
+            </select>
+        </div>
+        <div class="col-sm-5">
+            <input type="date" />
+        </div>
+        <div class="col-sm-2">
+        <?=Html::submitButton('Apply',['class'=>'btn btn-primary btn-flat btn-block'])?>
+        </div>
     </div>
-
-    <div class="body-content">
-
+ 
+    <?=Html::endForm()?>
+ 
+    <?php $box->end()?>
+ 
+    <div id="report">
         <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
+            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                <?=Box::widget(['invisible'=>true,'title'=>'Target Cost','bodyLoad'=>['target-vs-actual','metric'=>'Cost'],'autoload'=>false,'hidden'=>true])?>
             </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
+ 
+            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                <?=Box::widget(['invisible'=>true,'title'=>'Target Actions','bodyLoad'=>['target-vs-actual','metric'=>'Actions'],'autoload'=>false,'hidden'=>true])?>
             </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
-
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
-
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
+ 
+            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                <?=Box::widget(['invisible'=>true,'title'=>'Target CPA','bodyLoad'=>['target-vs-actual','metric'=>'CostPerAction'],'autoload'=>false,'hidden'=>true])?>
             </div>
         </div>
-
+ 
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 pull-right">
+                <?=Box::widget(['title'=>'Highest Spending Search Queries','bodyLoad'=>['highest-spending-search-queries'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 pull-left">
+                <?=Box::widget(['title'=>'Network Performance','bodyLoad'=>['network-performance'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-6 pull-left">
+                <?=Box::widget(['title'=>'Device Performance','bodyLoad'=>['device-performance'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+        </div>
+ 
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                <?=Box::widget(['title'=>'Brand % of Spend','bodyLoad'=>['brand-spend'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                <?=Box::widget(['title'=>'Match type % of Spend','bodyLoad'=>['match-type-spend'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+        </div>
+ 
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                <?=Box::widget(['title'=>'Lost Impression Share','bodyLoad'=>['lost-impression-share'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                <?=Box::widget(['title'=>'Average Quality Score','bodyLoad'=>['average-quality-score'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+        </div>
+ 
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                <?=Box::widget(['title'=>'Expected CTR <small>drillthrough to most contributing campaigns</small>','bodyLoad'=>['expected-ctr'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                <?=Box::widget(['title'=>'Ad Relevance <small>drillthrough to most contributing campaigns</small>','bodyLoad'=>['ad-relevance'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                <?=Box::widget(['title'=>'Landing Pages Experience <small>drillthrough to most contributing campaigns</small>','bodyLoad'=>['landing-pages-experience'],'autoload'=>false,'hidden'=>true])?>
+            </div>
+        </div>
     </div>
-</div>
+ 
+<?php $this->registerJs("
+    $('#healthcheckform').submit(function(e){
+        e.preventDefault();
+        var data = $(this).serialize(); // this will be loaded via post on submit
+        $('#report .box-init').each(function(){
+            $(this).box('reload',data).box('show');
+        });
+    });
+");?>

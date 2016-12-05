@@ -16,7 +16,6 @@ class SignupForm extends Model
 	public $phone_number;
 	public $otp;
 	public $zipcode;
-    public $authkey;
     public $social_id;
 
     /**
@@ -74,15 +73,13 @@ class SignupForm extends Model
         $user->social_id = $this->social_id;
         $user->setPassword($this->password);
 		$user->otp='1234';
-        $this->authkey = $user->generateAuthKey();
+        $user->generateAuthKey();
         
         if($user->save()){
-
-            /*$resetLink = $_SERVER['HTTP_HOST'].'/site/verify-email?token='.$this->authkey;
+            $resetLink = $_SERVER['HTTP_HOST'].'/site/verify-email?type=user&token='.$user->auth_key;
             $varKeywordContent = array('{to_email}','{email_verification_link}');
             $varKeywordValueContent = array(ucfirst($this->email),$resetLink);
-
-            Yii::$app->commonfunction->sendMail(3,$this->email,$varKeywordContent,$varKeywordValueContent);*/
+            Yii::$app->commonfunction->sendMail(3,$this->email,$varKeywordContent,$varKeywordValueContent);
             return $user;
 
         } else {

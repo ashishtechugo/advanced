@@ -16,7 +16,6 @@ class SignupForm extends Model
 	public $phone_number;
 	public $otp;
 	public $zipcode;
-    public $authkey;
     public $social_id;
     public $social_type;
     public $id;
@@ -81,14 +80,13 @@ class SignupForm extends Model
         $driver->social_type = 'FACEBOOK';
         $driver->setPassword($this->password);
 		$driver->otp='1234';
-		//$driver->otp = md5($this->otp);
-        $this->authkey = $driver->generateAuthKey();
+        $driver->generateAuthKey();
         $driver->registration_datetime = date('Y-m-d H:i:s');
 
 		//return $driver->save() ? $driver : null;
         if($driver->save()){
 
-            $resetLink = $_SERVER['HTTP_HOST'].'/site/verify-email?token='.$this->authkey;
+            $resetLink = $_SERVER['HTTP_HOST'].'/site/verify-email?type=driver&token='.$driver->auth_key;
             $varKeywordContent = array('{to_email}','{email_verification_link}');
             $varKeywordValueContent = array(ucfirst($this->email),$resetLink);
 
@@ -100,5 +98,10 @@ class SignupForm extends Model
         }
     }
 
-    
+    /**
+     * Driver's details update.
+     */
+     public function updatedriver(){
+         echo "die";die;
+     } 
 }

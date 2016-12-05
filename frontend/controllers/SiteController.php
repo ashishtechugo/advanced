@@ -194,7 +194,7 @@ class SiteController extends Controller
      */
     public function actionResetPassword($token)
     {
-        //echo $token;die("die");
+        //echo $token;die;
         try {
             $model = new ResetPasswordForm($token);
         } catch (InvalidParamException $e) {
@@ -212,4 +212,27 @@ class SiteController extends Controller
         ]);
     }
 
+    /**
+     * Varify Email.
+     *
+     * @param string $token
+     * @return mixed
+     * @throws BadRequestHttpException
+     */
+     public function actionVerifyEmail($type,$token)
+     {
+         $result = Yii::$app->commonfunction->checkAuthkey($type,$token);
+         if($result === true){
+
+             Yii::$app->session->setFlash('success', 'Your email has been successfully verified.');
+             return $this->goHome();
+
+         }else{
+
+             Yii::$app->session->setFlash('success', 'Error occured in email-verification.');
+             return $this->goHome();
+
+         }
+
+     }
 }

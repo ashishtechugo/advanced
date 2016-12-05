@@ -89,11 +89,12 @@ class Driver extends ActiveRecord implements IdentityInterface
      * @param string $email
      * @return static|null
      */
-    public static function findByEmailPhone($email)
+    public static function findByEmailPhoneSocial($email)
     {
         return static::find()
                     ->Where('email = :email',[':email' => $email])
-                    ->orWhere('phone_number = :email',[':email' => $email])
+                    ->orWhere('phone_number = :phone_number',[':phone_number' => $email])
+                    ->orWhere('social_id = :social_id',[':social_id' => $email])
                     ->one();
     }
 

@@ -90,6 +90,29 @@ class UserController extends ActiveController{
         }
         return $model;
     }
+    
+    /**
+    *Social login usver
+    */
+    public function actionSocialLogin(){
+
+        $model = new LoginForm();
+        $model->scenario = 'sociallogin';
+        $model->load(Yii::$app->getRequest()->getBodyParams(),'');
+        if($model->validate()){
+            $user = $model->socialLogin();
+            if(!$user){
+                return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
+            }elseif($user->otp_status == "NO"){
+                $data = array('id'=>$user->id);
+                return ['error_code'=>201,'result' =>'success','message'=>'','data'=>$data];
+            }else{
+                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$user];
+            }
+        }else{
+            return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
+        }
+    }
 
     /**
     *Get OTP user
@@ -126,18 +149,19 @@ class UserController extends ActiveController{
     }
 
     /**
-    *Reset Password Validation By Mobile number & Email
+    *Reset Password OTP/EMAIL Verification
     */
-    public function actionResetPasswordValidate(){
+    public function actionResetPasswordOtp(){
         
         $requestData = Yii::$app->getRequest()->getBodyParams();
         //BY Mobile Number
-        if(isset($requestData['phone_number']) && !empty($requestData['phone_number'])){
+        if(isset($requestData['phone_number']) && !empty($requestData['phone_number'])) {
             
             //echo "mobile number";die;
             $resdata = Yii::$app->commonfunction->resetpasswordotp($requestData['phone_number'],'user');
             if(!empty($resdata)){
-                $data = array('id'=>$resdata['id'],'otp'=>$resdata['otp']);
+                $decrypted = Yii::$app->security->decryptByKey(utf8_decode($resdata['password_reset_otp']), \Yii::$app->params['hashkey']);
+                $data = array('phone_number'=>$requestData['phone_number'],'otp'=>$decrypted);
                 return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
             }else{
                 return ['error_code'=>400,'result' =>'failure','message'=>'Mobile number not found.'];
@@ -149,6 +173,32 @@ class UserController extends ActiveController{
         if(isset($requestData['email']) && !empty($requestData['email'])){
             echo "email";die;
         }
+
+    }
+
+    /**
+    *Reset Password OTP Validate
+    */
+    public function actionResetPasswordOtpValidate(){
+
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        //BY Mobile Number
+         if(isset($requestData['phone_number']) && empty($requestData['phone_number'])){
+            return ['error_code'=>400,'result' =>'failure','message'=>"Phone Number field required."];
+        }
+
+        if(isset($requestData['reset_otp']) && empty($requestData['reset_otp'])){
+            return ['error_code'=>400,'result' =>'failure','message'=>"RESET OTP field required."];
+        }
+
+        $resdata = Yii::$app->commonfunction->resetpasswordotpvalidate($requestData['reset_otp'],$requestData['phone_number'],'user');
+        if($resdata){
+            $data = array('phone_number'=>$requestData['phone_number']);
+            return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+        }else{
+            return ['error_code'=>400,'result' =>'failure','message'=>'Wrong reset OTP.'];
+        }
+
 
     }
 

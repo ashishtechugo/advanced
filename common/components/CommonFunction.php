@@ -210,14 +210,14 @@ class CommonFunction extends Component
     /**
      * Function : Check For AuthKey
      */
-     public function checkAuthkey($token){
+     public function checkAuthkey($tablename,$token){
          
-         $userDetailArray = Yii::$app->db->createCommand('SELECT * FROM driver WHERE auth_key=:auth_key')
+         $userDetailArray = Yii::$app->db->createCommand('SELECT * FROM '.$tablename.' WHERE auth_key=:auth_key')
            ->bindValue(':auth_key', $token)
            ->queryOne();
 
          if(!empty($userDetailArray)){
-             $updateStatus = Yii::$app->db->createCommand('UPDATE `driver` SET `email_verification_status` = "YES" WHERE auth_key=:auth_key')
+             $updateStatus = Yii::$app->db->createCommand('UPDATE '.$tablename.' SET `email_verification_status` = "YES" WHERE auth_key=:auth_key')
              ->bindValue(':auth_key', $token)
              ->execute();
              
@@ -258,6 +258,7 @@ class CommonFunction extends Component
      */
      public function genrateotp($id,$tablename){
          $otp = rand(1001,9999);
+         
          $updateStatus = Yii::$app->db->createCommand('UPDATE `'.$tablename.'` SET `otp` = '.$otp.' WHERE id=:id')
              ->bindValue(':id', $id)
              ->execute();
@@ -271,17 +272,38 @@ class CommonFunction extends Component
      *Genrate otp and update previous otp for reset password
      */
      public function resetpasswordotp($phone_number,$tablename){
-         $otp = rand(1001,9999);
-         $updateStatus = Yii::$app->db->createCommand('UPDATE `'.$tablename.'` SET `otp` = '.$otp.' WHERE phone_number=:phone_number')
+         //$otp = rand(1001,9999);
+         $otp = '1234';
+         $password_reset_otp  = utf8_encode(Yii::$app->security->encryptByKey( $otp, \Yii::$app->params['hashkey'] ));
+         $updateStatus = Yii::$app->db->createCommand('UPDATE `'.$tablename.'` SET `password_reset_otp` =:password_reset_otp  WHERE phone_number=:phone_number')
              ->bindValue(':phone_number', $phone_number)
+             ->bindValue(':password_reset_otp', $password_reset_otp)
              ->execute();
         if($updateStatus == 1){
-            $userDetailArray = Yii::$app->db->createCommand('SELECT * FROM '.$tablename.' WHERE phone_number=:phone_number AND otp=:otp')
+            $userDetailArray = Yii::$app->db->createCommand('SELECT * FROM '.$tablename.' WHERE phone_number=:phone_number AND password_reset_otp=:password_reset_otp')
                 ->bindValue(':phone_number', $phone_number)
-                ->bindValue(':otp', $otp)
+                ->bindValue(':password_reset_otp', $password_reset_otp)
                 ->queryOne();
 
             return $userDetailArray;
+        }
+
+     }
+
+     /**
+     *Check OTP Regarding Phone Number
+     */
+     public function resetpasswordotpvalidate($otp,$phone_number,$tablename){
+
+         $userDetailArray = Yii::$app->db->createCommand('SELECT password_reset_otp FROM '.$tablename.' WHERE phone_number=:phone_number')
+                ->bindValue(':phone_number', $phone_number)
+                ->queryOne();
+        
+        $decrypted = Yii::$app->security->decryptByKey(utf8_decode($userDetailArray['password_reset_otp']), \Yii::$app->params['hashkey']);
+        if($otp == $decrypted){
+            return true;
+        }else{
+            return false;
         }
 
      }

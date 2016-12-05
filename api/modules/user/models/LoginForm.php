@@ -11,9 +11,9 @@ use common\models\User;
 class LoginForm extends Model
 {
     public $email;
-    public $phone_number;
     public $password;
     public $new_password;
+    public $social_id;
     //public $rememberMe = true;
 
     private $_user;
@@ -26,19 +26,24 @@ class LoginForm extends Model
     {
         return [
             // email 
-            [['email','password'], 'required'],
-            ['email', 'emailNotExist'],
+            [['email'], 'required','except'=>'sociallogin'],
+            ['email', 'emailNotExist','except'=>'sociallogin'],
 
 
             // rememberMe must be a boolean value
             //['rememberMe', 'boolean'],
 
             // password is validated by validatePassword()
-            ['password', 'validatePassword'],
+            [['password'], 'required','except'=>['sociallogin','resetpass']],
+            ['password', 'validatePassword','except'=>['sociallogin','resetpass']],
 
             //For reset password
             ['new_password','safe','on'=>'resetpass'],
             ['new_password','string','min' => 6,'on'=>'resetpass'],
+
+            //social id validation
+            ['social_id','required','on'=>'sociallogin'],
+            ['social_id','validateSocial','on'=>'sociallogin'],
 
         ];
     }
@@ -77,6 +82,18 @@ class LoginForm extends Model
     }
 
     /**
+    * Validate social id in driver table.
+    */
+    public function validateSocial($attribute,$params){
+        if (!$this->hasErrors()) {
+            $user = $this->getUserBySocial();
+            if(empty($user)){
+                $this->addError($attribute,'Social-Id does not exists.');
+            }
+        }
+    }
+
+    /**
      * Logs in a user using the provided username and password.
      *
      * @return bool whether the user is logged in successfully
@@ -98,7 +115,21 @@ class LoginForm extends Model
     protected function getUser()
     {
         if ($this->_user === null) {
-            $this->_user = User::findByEmailPhone($this->email);
+            $this->_user = User::findByEmailPhoneSocial($this->email);
+        }
+
+        return $this->_user;
+    }
+
+    /**
+     * Finds user by [[socialid]]
+     *
+     * @return User|null
+     */
+    protected function getUserBySocial()
+    {
+        if ($this->_user === null) {
+            $this->_user = User::findByEmailPhoneSocial($this->social_id);
         }
 
         return $this->_user;
@@ -117,9 +148,9 @@ class LoginForm extends Model
             if(!empty($userDetail)){
                 
                 //Update New Password If User Exists.
-                $user = User::findByEmailPhone($this->email);
+                $user = User::findByEmailPhoneSocial($this->email);
                 $user->setPassword($this->new_password);
-                //print_r($user);
+                $user->password_reset_otp = "";
                 if($user->save(false)){
                     $msg = array('msg'=>'Password has been updated.');
                     return $msg;
@@ -131,6 +162,15 @@ class LoginForm extends Model
         }
     }
 
-    
+    /**
+    *Login by social id.
+    */
+    public function socialLogin(){
+        if ($this->validate()) {
+            return $this->getUserBySocial();
+        } else {
+            return false;
+        }
+    }
 
 }

@@ -97,6 +97,29 @@ class DriverController extends ActiveController
     }
 
     /**
+    *Social login driver
+    */
+    public function actionSocialLogin(){
+
+        $model = new LoginForm();
+        $model->scenario = 'sociallogin';
+        $model->load(Yii::$app->getRequest()->getBodyParams(),'');
+        if($model->validate()){
+            $driver = $model->socialLogin();
+            if(!$driver){
+                return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
+            }elseif($driver->otp_status == 'NO') {
+                $data = array('id'=>$driver->id);
+                return ['error_code'=>201,'result' =>'success','message'=>'','data'=>$data];
+            }else{
+                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
+            }
+        }else{
+            return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
+        }
+    }
+
+    /**
     *Get OTP driver
     */
     public function actionGetOtp(){
@@ -126,6 +149,99 @@ class DriverController extends ActiveController
             return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
         }else{
             return ['error_code'=>400,'result' =>'failure','message'=>"Wrong OTP"];
+        }
+
+    }
+
+    /**
+    *Reset Password OTP/EMAIL Verification
+    */
+    public function actionResetPasswordOtp(){
+
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        //BY Mobile Number
+        if(isset($requestData['phone_number']) && !empty($requestData['phone_number'])) {
+            
+            $resdata = Yii::$app->commonfunction->resetpasswordotp($requestData['phone_number'],'driver');
+            if(!empty($resdata)){
+                $decrypted = Yii::$app->security->decryptByKey(utf8_decode($resdata['password_reset_otp']), \Yii::$app->params['hashkey']);
+                $data = array('phone_number'=>$requestData['phone_number'],'otp'=>$decrypted);
+                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+            }else{
+                return ['error_code'=>400,'result' =>'failure','message'=>'Mobile number not found.'];
+            }
+
+        }
+
+        //BY Email-ID
+        if(isset($requestData['email']) && !empty($requestData['email'])){
+            echo "email";die;
+        }
+
+    }
+
+    /**
+    *Reset Password OTP Validate
+    */
+    public function actionResetPasswordOtpValidate(){
+
+        $requestData = Yii::$app->getRequest()->getBodyParams();
+        //BY Mobile Number
+         if(isset($requestData['phone_number']) && empty($requestData['phone_number'])){
+            return ['error_code'=>400,'result' =>'failure','message'=>"Phone Number field required."];
+        }
+
+        if(isset($requestData['reset_otp']) && empty($requestData['reset_otp'])){
+            return ['error_code'=>400,'result' =>'failure','message'=>"RESET OTP field required."];
+        }
+
+        $resdata = Yii::$app->commonfunction->resetpasswordotpvalidate($requestData['reset_otp'],$requestData['phone_number'],'driver');
+        if($resdata){
+            $data = array('phone_number'=>$requestData['phone_number']);
+            return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$data];
+        }else{
+            return ['error_code'=>400,'result' =>'failure','message'=>'Wrong reset OTP.'];
+        }
+
+
+    }
+
+    /**
+    *Reset Password OTP Validation 
+    */
+    public function actionResetPassword(){
+
+        $model = new LoginForm();
+        $model->scenario = 'resetpass';
+        $model->load(Yii::$app->getRequest()->getBodyParams(),'');
+        if($model->validate()){
+            $driver = $model->resetpassword();
+            if(!$driver){
+                return ['error_code'=>400,'result' =>'failure','message'=>array_values($model->getFirstErrors())[0]];
+            }else{
+                return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
+            }
+        }else{
+            return ['error_code'=>400,'result'=>'failuree','message'=>array_values($model->getFirstErrors())[0]];
+        }
+
+    }
+
+    /**
+    *Update driver's details
+    */
+    public function actionUpdateDriver(){
+
+        $model = new Signup();
+        $model->load(Yii::$app->getRequest()->getBodyParams());
+        $updatedata = $model->updatedriver();
+
+        return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
+
+        if($updatedata){
+            return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
+        }else{
+            return ['error_code'=>200,'result' =>'success','message'=>'','data'=>$driver];
         }
 
     }
